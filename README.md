@@ -5,7 +5,8 @@
 
 ###### 与Mybatis-plus官方提供的内置分页插件 PaginnationInnerInterceptor 相比，该拦截器支持用户自定义用来查总记录数的sql语句
 `CustomizablePaginationInterceptor (Alias: Customizable)`
-`PaginnationInnerInterceptor  (Alias: Inner)`
+`PaginnationInnerInterceptor  (Alias: Inner)`    
+
 `Customizable` 继承 `Inner`
 `Customizable`只是对原生`Inner`的拓展,使用`Customizable`插件**不会**给原项目带来额外负担
 
@@ -52,7 +53,7 @@ mybatis-plus:
         select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
     </select>
  ```
-1. pom.xml 概览
+3. pom.xml 概览
  ```xml
     <parent>
         <groupId>org.springframework.boot</groupId>
