@@ -36,22 +36,23 @@ mybatis-plus:
  ```xml
     mapper.xml
 
-    <select id="selectAllSubscriberById" parameterType="int" resultType="user">
-        SELECT subscriber.*
-        FROM blogger, subscriber
-    </select>
+    <!--这是支持 selectPage(Page<T>) 分页方法查询总数的sql-->
+   <select id="selectAllSubscriberById" parameterType="int" resultType="user">
+       SELECT subscriber.*
+       FROM blogger, subscriber
+   </select>
 
-    <!-- 设置了open-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
-    <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 java.lang.Long-->
-    <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
-        SELECT subscriber.id
-        FROM blogger, subscriber
-    </select>
+   <!-- 设置了open-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
+   <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 java.lang.Long-->
+   <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
+       SELECT COUNT(subscriber.id)
+       FROM blogger, subscriber
+   </select>
 
-    <!-- 自定义mybatis-plus中selectPage的总数查询sql -->
-    <select id="selectPage_COUNT" resultType="Long">
-        select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
-    </select>
+   <!-- 自定义mybatis-plus中selectPage的总数查询sql -->
+   <select id="selectPage_COUNT" resultType="Long">
+       select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
+   </select>
  ```
 3. pom.xml 概览
  ```xml
