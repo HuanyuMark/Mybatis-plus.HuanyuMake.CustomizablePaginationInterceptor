@@ -58,6 +58,21 @@ public class MybatisPlusConfig {
 }
  ```
  ---
+ ## 4.在mapper.xml中配置对应自定义查询sql,这里引用 `其它说明` 的 `第3点` 的例子
+ 
+ ## 5.调用mapper接口方法, 这里调用的是 selectPage(new Page<>(1,10),null)
+
+ ## 5.控制台日志
+ ```cmd
+ ==>  Preparing: select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
+==> Parameters: 
+<==    Columns: total
+<==        Row: 12
+<==      Total: 1
+==>  Preparing: SELECT id,name,login_state,latest_login_time FROM users LIMIT ?
+==> Parameters: 10(Long)
+ ```
+ ---
  ## 其它说明
 1. 以上 `customizable-pagination-interceptor` 下的属性都不是必要项, 都有默认值, 按需设置就行
 
