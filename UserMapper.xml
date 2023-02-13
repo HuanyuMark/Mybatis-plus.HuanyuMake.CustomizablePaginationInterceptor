@@ -4,23 +4,21 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.HuanyuMake.dao.UserMapper">
     <!--这是支持 selectPage(Page<T>) 分页方法查询总数的sql-->
-    <select id="selectPage_COUNT" resultType="Long">
-        select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
-    </select>
+   <select id="selectAllSubscriberById" parameterType="int" resultType="user">
+       SELECT subscriber.*
+       FROM blogger, subscriber
+   </select>
 
-    <select id="selectAllSubscriberById" parameterType="int" resultType="user">
-        SELECT subscriber.*
-        FROM users AS blogger, subscriptions, users AS subscriber
-        WHERE blogger.id = #{id} AND subscriptions.blogger_user_id = blogger.id
-          AND subscriber.id = subscriptions.subscriber_user_id
-    </select>
+   <!-- 设置了open-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
+   <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 java.lang.Long-->
+   <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
+       SELECT subscriber.id
+       FROM blogger, subscriber
+   </select>
 
-    <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 Long-->
-    <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
-        SELECT subscriber.*
-        FROM users AS blogger, subscriptions, users AS subscriber
-        WHERE blogger.id = #{id} AND subscriptions.blogger_user_id = blogger.id
-          AND subscriber.id = subscriptions.subscriber_user_id
-    </select>
+   <!-- 自定义mybatis-plus中selectPage的总数查询sql -->
+   <select id="selectPage_COUNT" resultType="Long">
+       select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
+   </select>
 
 </mapper>
