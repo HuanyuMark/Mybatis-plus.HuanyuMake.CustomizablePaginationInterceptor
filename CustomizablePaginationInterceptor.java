@@ -1,10 +1,8 @@
-//package com.pdl.chatroomjava.config.configDependency;
+package org.HuanyuMake.CustomizablePaginationInterceptor;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.pdl.chatroomjava.util.PHR.pagination.EPage;
-import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -28,14 +26,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Date: 2023/2/12 23:20
- * 改写发出 select count(*) sql 的方法,并使用该子类
+ * Date: 2023/2/13 21:53
+ * 重写了发出 "select count(*)"sql 的 autoCountSql 的方法, 可自定义总记录查询sql
  * @author HuanyuMake
  * @version 0.0.2
  */
 
 @Configuration
-@ConfigurationProperties("mybatis-plus.configuration.customizable-pagination-interceptor")
+// 定义从mybatis-plus.configuration.customizable-pagination-interceptor 前缀的application文件中读取属性配置该Bean
+@ConfigurationProperties("mybatis-plus.configuration.customizable-pagination-interceptor") 
 public class CustomizablePaginationInterceptor extends PaginationInnerInterceptor {
     protected String countField = "COUNT(1)";
     protected String countFieldAlias = "total";
@@ -48,27 +47,21 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                             (new Column()).withColumnName(countField)
                     )
             ).withAlias(new Alias(countFieldAlias))
-    );
+    );  // 相当于 COUNT(1) AS total
 
     public boolean willDoQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
-//        MybatisSqlScouter.updateLastSqlID();
+        /*更新此次使用的MappedStatement,方便在 autoCountSql中使用*/
         lastMs = ms;
         return super.willDoQuery(executor , ms, parameter,rowBounds,resultHandler,boundSql);
     }
 
     @Override
     protected String lowLevelCountSql(String originalSql) {
-        return String.format("SELECT %s FROM (%s) TOTAL", countField,originalSql);
+        // 此处也使用自定义的总数查询sql
+        return String.format("SELECT %s AS %s FROM (%s) TOTAL", countField,countFieldAlias,originalSql);
     }
     @Override
-    @SuppressWarnings("all")
     protected String autoCountSql(@NotNull IPage<?> page, String sql) {
-        if(page instanceof EPage<?> ) {
-            String eCountSql = ((EPage) page).GetCustomizeCountSql();
-            if(eCountSql != null){
-                return eCountSql;
-            }
-        }
         if(openMapperCountSql) {
             // 尝试在mapper中查找是否有 countSqlSuffix 后缀的SQL,
             MappedStatement ms = null;
@@ -79,18 +72,22 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
             } catch (Exception ignore){}
             // 若找到对应的count statement
             if(ms != null) {
-                // 若statement
+                // 若statement的返回值不是 java.lang.Long类型,则抛出 IllegalResultType 错误
                 if (ms.getResultMaps().get(0).getType() != Long.class) {
                     throw new IllegalResultType(
                             String.format("Statement '%s%s' return an illegal result type '%s',\n it must be '%s' type",
                                     lastMs.getId(),countSqlSuffix, ms.getResultMaps().get(0).getType(), Long.class.getName()));
                 }
+                // 返回正确的statement对应的sql字符串, 形如 "SELECT COUNT(1) AS total FROM user"
                 return ms.getBoundSql(null)
                         .getSql();
             }
         }
 
-
+        /*
+         * 以下和 PaginationInnerInterceptor 父类的片段大体相同, 没有进行其它的逻辑处理, 
+         * 之所以要抄过来是因为要使用本类的COUNT_SELECT_ITEM来充当查询总记录数的字段
+        */ 
         if (!page.optimizeCountSql()) {
             return this.lowLevelCountSql(sql);
         } else {
@@ -191,7 +188,7 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                             }
                         }
                     }
-
+                    // 使用本类的 COUNT_SELECT_ITEM 来充当查询字段
                     plainSelect.setSelectItems(COUNT_SELECT_ITEM);
                     return select.toString();
                 }
