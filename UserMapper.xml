@@ -12,7 +12,7 @@
    <!-- 设置了open-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
    <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 java.lang.Long-->
    <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
-       SELECT subscriber.id
+       SELECT COUNT(subscriber.id)
        FROM blogger, subscriber
    </select>
 
