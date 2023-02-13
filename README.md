@@ -62,7 +62,7 @@ public class MybatisPlusConfig {
  
  ## 5.调用mapper接口方法, 这里调用的是 selectPage(new Page<>(1,10),null)
 
- ## 5.控制台日志
+ ## 6.控制台日志
  ```cmd
  ==>  Preparing: select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'project' AND TABLE_NAME = 'users'
 ==> Parameters: 
