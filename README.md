@@ -64,7 +64,7 @@ public class MybatisPlusConfig {
 
  ## 5.控制台日志
  ```cmd
- ==>  Preparing: select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
+ ==>  Preparing: select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'project' AND TABLE_NAME = 'users'
 ==> Parameters: 
 <==    Columns: total
 <==        Row: 12
@@ -98,7 +98,7 @@ public class MybatisPlusConfig {
 
    <!-- 自定义mybatis-plus中selectPage的总数查询sql -->
    <select id="selectPage_COUNT" resultType="Long">
-       select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'poetryplatform' AND TABLE_NAME = 'users'
+       select TABLE_ROWS AS total from information_schema.TABLES where TABLE_SCHEMA = 'project' AND TABLE_NAME = 'users'
    </select>
  ```
 4. pom.xml 概览
