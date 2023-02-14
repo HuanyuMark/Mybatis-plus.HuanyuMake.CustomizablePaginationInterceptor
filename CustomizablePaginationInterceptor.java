@@ -1,4 +1,4 @@
-package org.HuanyuMake.CustomizablePaginationInterceptor;
+package com.pdl.chatroomjava.config.configDependency;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -21,12 +21,11 @@ import org.springframework.context.annotation.Configuration;
 
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Date: 2023/2/13 21:53
+ * Date: 2023/2/14 17:37
  * 重写了发出 "select count(*)"sql 的 autoCountSql 的方法, 可自定义总记录查询sql
  * @author HuanyuMake
  * @version 0.0.2
@@ -34,12 +33,12 @@ import java.util.Optional;
 
 @Configuration
 // 定义从mybatis-plus.configuration.customizable-pagination-interceptor 前缀的application文件中读取属性配置该Bean
-@ConfigurationProperties("mybatis-plus.configuration.customizable-pagination-interceptor") 
+@ConfigurationProperties("mybatis-plus.configuration.customizable-pagination-interceptor")
 public class CustomizablePaginationInterceptor extends PaginationInnerInterceptor {
     protected String countField = "COUNT(1)";
     protected String countFieldAlias = "total";
     protected String countSqlSuffix = "_COUNT";
-    protected Boolean openMapperCountSql = false;
+    protected Boolean useMapperCountSql = false;
     protected MappedStatement lastMs;
     protected List<SelectItem> COUNT_SELECT_ITEM = Collections.singletonList(
             (
@@ -62,7 +61,7 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
     }
     @Override
     protected String autoCountSql(@NotNull IPage<?> page, String sql) {
-        if(openMapperCountSql) {
+        if(useMapperCountSql) {
             // 尝试在mapper中查找是否有 countSqlSuffix 后缀的SQL,
             MappedStatement ms = null;
             try {
@@ -75,7 +74,7 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                 // 若statement的返回值不是 java.lang.Long类型,则抛出 IllegalResultType 错误
                 if (ms.getResultMaps().get(0).getType() != Long.class) {
                     throw new IllegalResultType(
-                            String.format("Statement '%s%s' return an illegal result type '%s',\n it must be '%s' type",
+                            String.format("Statement '%s%s' return an illegal result type '%s', it must be '%s' type",
                                     lastMs.getId(),countSqlSuffix, ms.getResultMaps().get(0).getType(), Long.class.getName()));
                 }
                 // 返回正确的statement对应的sql字符串, 形如 "SELECT COUNT(1) AS total FROM user"
@@ -85,9 +84,9 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
         }
 
         /*
-         * 以下和 PaginationInnerInterceptor 父类的片段大体相同, 没有进行其它的逻辑处理, 
+         * 以下和 PaginationInnerInterceptor 父类的片段大体相同, 没有进行其它的逻辑处理,
          * 之所以要抄过来是因为要使用本类的COUNT_SELECT_ITEM来充当查询总记录数的字段
-        */ 
+         */
         if (!page.optimizeCountSql()) {
             return this.lowLevelCountSql(sql);
         } else {
@@ -109,10 +108,8 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                     }
 
                     if (canClean) {
-                        Iterator var10 = orderBy.iterator();
 
-                        while (var10.hasNext()) {
-                            OrderByElement order = (OrderByElement) var10.next();
+                        for (OrderByElement order : orderBy) {
                             Expression expression = order.getExpression();
                             if (!(expression instanceof Column) && expression.toString().contains("?")) {
                                 canClean = false;
@@ -126,10 +123,7 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                     }
                 }
 
-                Iterator var21 = plainSelect.getSelectItems().iterator();
-
-                while (var21.hasNext()) {
-                    SelectItem item = (SelectItem) var21.next();
+                for (SelectItem item : plainSelect.getSelectItems()) {
                     if (item.toString().contains("?")) {
                         return this.lowLevelCountSql(select.toString());
                     }
@@ -142,10 +136,8 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                             boolean canRemoveJoin = true;
                             String whereS = (String) Optional.ofNullable(plainSelect.getWhere()).map(Object::toString).orElse("");
                             whereS = whereS.toLowerCase();
-                            Iterator var25 = joins.iterator();
 
-                            while (var25.hasNext()) {
-                                Join join = (Join) var25.next();
+                            for (Join join : joins) {
                                 if (!join.isLeft()) {
                                     canRemoveJoin = false;
                                     break;
@@ -153,11 +145,9 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
 
                                 FromItem rightItem = join.getRightItem();
                                 String str = "";
-                                if (rightItem instanceof Table) {
-                                    Table table = (Table) rightItem;
-                                    str = (String) Optional.ofNullable(table.getAlias()).map(Alias::getName).orElse(table.getName()) + ".";
-                                } else if (rightItem instanceof SubSelect) {
-                                    SubSelect subSelect = (SubSelect) rightItem;
+                                if (rightItem instanceof Table table) {
+                                    str = Optional.ofNullable(table.getAlias()).map(Alias::getName).orElse(table.getName()) + ".";
+                                } else if (rightItem instanceof SubSelect subSelect) {
                                     if (subSelect.toString().contains("?")) {
                                         canRemoveJoin = false;
                                         break;
@@ -172,10 +162,7 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
                                     break;
                                 }
 
-                                Iterator var27 = join.getOnExpressions().iterator();
-
-                                while (var27.hasNext()) {
-                                    Expression expression = (Expression) var27.next();
+                                for (Expression expression : join.getOnExpressions()) {
                                     if (expression.toString().contains("?")) {
                                         canRemoveJoin = false;
                                         break;
@@ -232,12 +219,12 @@ public class CustomizablePaginationInterceptor extends PaginationInnerIntercepto
         return this;
     }
 
-    public Boolean getOpenMapperCountSql() {
-        return openMapperCountSql;
+    public Boolean getUseMapperCountSql() {
+        return useMapperCountSql;
     }
 
-    public CustomizablePaginationInterceptor setOpenMapperCountSql(Boolean openMapperCountSql) {
-        this.openMapperCountSql = openMapperCountSql;
+    public CustomizablePaginationInterceptor setUseMapperCountSql(Boolean useMapperCountSql) {
+        this.useMapperCountSql = useMapperCountSql;
         return this;
     }
 
