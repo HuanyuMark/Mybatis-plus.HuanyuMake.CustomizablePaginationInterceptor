@@ -1,4 +1,4 @@
-package com.pdl.chatroomjava.config.configDependency;
+package com.yourcom.project.mybatis.interceptor;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
