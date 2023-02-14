@@ -22,7 +22,7 @@ mybatis-plus:
     customizable-pagination-interceptor:
       count-field: 'COUNT(1)'   # 自定义 select countField from (xx) 的countField默认内容, 默认为 'COUNT(1)'
       count-field-alias: 'total' # 自定义 select countField AS countFieldAlias from (xx) countFieldAlias 内容, 默认为 'total'
-      open-mapper-count-sql: true  # 开启对同mapper中 总记录查询语句的<select>字句的使用, 默认为 false
+      use-mapper-count-sql: true  # 开启对同mapper中 总记录查询语句的<select>字句的使用, 默认为 false
       count-sql-suffix: '_COUNT' # 选择使用什么后缀的同id<select>子句作为总记录数查询sql, 默认为'_COUNT'
       max-limit: 2000  # 自定义一页最多有多少条记录数
       
@@ -78,7 +78,7 @@ public class MybatisPlusConfig {
 
 2. 不注册插件的话, `CustomizablePaginationInterceptor`是不会工作的
   
-3. 如果不设置 `open-mapper-count-sql`为 `true`, 则不能自动使用自定义sql来查询总记录数
+3. 如果不设置 `use-mapper-count-sql`为 `true`, 则不能自动使用自定义sql来查询总记录数
  使用以上配置, 例子:
  ```xml
     mapper.xml
@@ -89,7 +89,7 @@ public class MybatisPlusConfig {
        FROM blogger, subscriber
    </select>
 
-   <!-- 设置了open-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
+   <!-- 设置了use-mapper-count-sql = true , 且 count-sql-suffix = '_COUNT' 则会使用该句查询总记录数 -->
    <!-- 这是自定义 selectAllSubscriberById sql的总数查询sql的sql语句, 但要注意这些语句的 resultType 必须为 java.lang.Long-->
    <select id="selectAllSubscriberById_COUNT" parameterType="int" resultType="Long">
        SELECT COUNT(subscriber.id)
